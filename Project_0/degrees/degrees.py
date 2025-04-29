@@ -92,9 +92,35 @@ def shortest_path(source, target):
     If no possible path, returns None.
     """
 
-    # TODO
-    raise NotImplementedError
+    if source == target:
+        return []
 
+    node = Node(state=source, parent=None, action=None)
+    frontier = QueueFrontier()
+    frontier.add(node)
+    explored = set()
+
+    while True:
+        if frontier.empty():
+            return None
+
+        node = frontier.remove()
+        if node.action is not None:
+            explored.add(node.state)
+
+        for neighbor in neighbors_for_person(node.state):
+            neighbor = Node(state=neighbor[1], parent=node, action=neighbor[0])
+            if neighbor.state not in explored and not frontier.contains_state(neighbor.state):
+                if neighbor.state == target:
+                    path = []
+                    while neighbor.parent is not None:
+                        path.append((neighbor.action, neighbor.state))
+                        neighbor = neighbor.parent
+                    path.reverse()
+
+                    return path
+                else:
+                    frontier.add(neighbor)
 
 def person_id_for_name(name):
     """
