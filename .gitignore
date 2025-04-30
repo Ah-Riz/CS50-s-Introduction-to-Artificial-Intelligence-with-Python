@@ -127,3 +127,4 @@ dmypy.json
 small/
 large/
 assets/
+.debug.py
