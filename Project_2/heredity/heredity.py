@@ -139,7 +139,42 @@ def joint_probability(people, one_gene, two_genes, have_trait):
         * everyone in set `have_trait` has the trait, and
         * everyone not in set` have_trait` does not have the trait.
     """
-    raise NotImplementedError
+    prob = 1
+    for person in people:
+        # Get number of genes and the trait probability
+        num_gene = number_genes(people,one_gene,two_genes,person)
+        prob_trait, bool_trait = get_trait(person,have_trait,num_gene)
+
+        # Probability for persons without parents
+        if people[person]['mother'] == None and people[person]['father'] == None:
+            p_temp = PROBS["gene"][num_gene] * prob_trait
+            prob *= p_temp
+        # Probability for persons with parents
+        else:
+            # Get parents number of genes
+            father = people[person]['father']
+            mother = people[person]['mother']
+            num_genes_father = number_genes(people,one_gene,two_genes,father)
+            num_genes_mother = number_genes(people,one_gene,two_genes,mother)
+
+            # Get child probability
+            prob_of_child = 0
+            for x in range(num_gene + 1):
+                # You can only get 0 or 1 gene for your ancestor 
+                # so when you have num_gene = 2 then x will be 0, 1 and 2. 
+                # In that case when x=2, no probability should be computed.
+                y = num_gene - x
+                if x < 2 and y < 2:
+                    prob_of_child += (prob_child(num_genes_mother,x) * prob_child(num_genes_father,y))
+
+            prob_of_child *= prob_trait
+            
+            # final probability
+            prob *= prob_of_child
+
+    return prob
+
+    # raise NotImplementedError
 
 
 def update(probabilities, one_gene, two_genes, have_trait, p):
@@ -149,7 +184,17 @@ def update(probabilities, one_gene, two_genes, have_trait, p):
     Which value for each distribution is updated depends on whether
     the person is in `have_gene` and `have_trait`, respectively.
     """
-    raise NotImplementedError
+
+    for person in probabilities:
+        # Get number of genes and if it has trait or not
+        num_gene = number_genes(probabilities,one_gene,two_genes,person)
+        prob_trait, bool_trait = get_trait(person,have_trait,num_gene)
+
+        # Update probabilities for person gene and trait
+        probabilities[person]['gene'][num_gene] += p
+        probabilities[person]['trait'][bool_trait] += p
+
+    # raise NotImplementedError
 
 
 def normalize(probabilities):
@@ -157,7 +202,63 @@ def normalize(probabilities):
     Update `probabilities` such that each probability distribution
     is normalized (i.e., sums to 1, with relative proportions the same).
     """
-    raise NotImplementedError
+
+    for person in probabilities:
+
+        total_gene = 0
+        total_trait = 0  
+
+        for i in probabilities[person]["gene"]:
+            total_gene += probabilities[person]['gene'][i]
+        
+        for j in probabilities[person]["trait"]:
+            total_trait += probabilities[person]['trait'][j]
+
+        for gene in probabilities[person]['gene']:
+            probabilities[person]['gene'][gene] /= total_gene
+        
+        for trait in probabilities[person]['trait']:
+            probabilities[person]['trait'][trait] /= total_trait
+    # raise NotImplementedError
+
+
+def number_genes(people, one_gene, two_genes, person):
+    """ 
+    Get the number of genes for each person
+    """
+    zero_gene = set(people.keys()) - one_gene - two_genes
+    if person in zero_gene:
+        return 0
+    elif person in one_gene:
+        return 1
+    else:
+        return 2
+
+def get_trait(person,have_trait,num_gene):
+    if person in have_trait:
+        return PROBS["trait"][num_gene][True], True
+    else:
+        return PROBS["trait"][num_gene][False], False
+
+def prob_child(parent_num_genes,child_num_genes):
+    prob_mut = PROBS["mutation"]
+    prob_not_mut = 1 - prob_mut
+    if parent_num_genes == 0:
+        if child_num_genes == 0:
+            return prob_not_mut
+        else:
+            return prob_mut
+    elif parent_num_genes == 1:
+        p_temp = 0.5 * prob_not_mut + 0.5 * prob_mut
+        if child_num_genes == 0:
+            return p_temp
+        else:
+            return 1 - p_temp
+    elif parent_num_genes == 2:
+        if child_num_genes == 0:
+            return prob_mut
+        else:
+            return prob_not_mut
 
 
 if __name__ == "__main__":
