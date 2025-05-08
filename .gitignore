@@ -131,6 +131,7 @@ corpus0/
 corpus1/
 corpus2/
 data/
+gtsrb/
 
 .debug.py
 *.csv
