@@ -1,0 +1,2 @@
+I found that there is a missing detail in the model definition: the input shape for the first layer must be specified by using the argument input_shape=(IMG_WIDTH, IMG_HEIGHT, 3) in the Conv2D layer so that TensorFlow can process the image data.
+Batch normalization is a technique used to normalize the activation of each layer of a neural network when training. It acts to stabilize and speed up the training process by ensuring the input data to have zero mean and unit variance, and significantly impacts the model's performance.
