@@ -133,3 +133,4 @@ corpus2/
 data/
 
 .debug.py
+*.csv
