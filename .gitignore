@@ -132,6 +132,7 @@ corpus1/
 corpus2/
 data/
 gtsrb/
+sentences/
 
 .debug.py
 *.csv
