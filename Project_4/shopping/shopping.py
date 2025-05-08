@@ -59,7 +59,68 @@ def load_data(filename):
     labels should be the corresponding list of labels, where each label
     is 1 if Revenue is true, and 0 otherwise.
     """
-    raise NotImplementedError
+    # raise NotImplementedError
+    with open(filename) as f:
+        reader = csv.DictReader(f)
+        evidence = []
+        labels = []
+        
+        for row in reader:
+            evidence.append([
+                int(row['Administrative']),
+                float(row['Administrative_Duration']),
+                int(row['Informational']),
+                float(row['Informational_Duration']),
+                int(row['ProductRelated']),
+                float(row['ProductRelated_Duration']),
+                float(row['BounceRates']),
+                float(row['ExitRates']),
+                float(row['PageValues']),
+                float(row['SpecialDay']),
+                convert_month(row['Month']),
+                int(row['OperatingSystems']),
+                int(row['Browser']),
+                int(row['Region']),
+                int(row['TrafficType']),
+                convert_to_int(row['VisitorType'], ['returning_visitor']),
+                convert_to_int(row['Weekend'], ['false', 'true']),
+            ])
+            labels.append(convert_to_int(row['Revenue'], ['false', 'true']))
+    return evidence, labels
+
+def convert_to_int(value, values_list):
+    """
+    Convert a string value to a integer based on the given strings.
+    """
+    if value.lower() in values_list:
+        if len(values_list) > 1:
+            return values_list.index(value.lower())
+        else:
+            return 1
+    elif len(values_list) == 1:
+        return 0
+    else:
+        raise ValueError(f"Value '{value}' not found in {values_list}")
+
+def convert_month(month):
+    """
+    Convert a month string to an integer index from 0 (January) to 11 (December).
+    """
+    months = {
+        "Jan": 0,
+        "Feb": 1,
+        "Mar": 2,
+        "Apr": 3,
+        "May": 4,
+        "Jun": 5,
+        "Jul": 6,
+        "Aug": 7,
+        "Sep": 8,
+        "Oct": 9,
+        "Nov": 10,
+        "Dec": 11
+    }
+    return months[month[:3]]
 
 
 def train_model(evidence, labels):
@@ -67,7 +128,10 @@ def train_model(evidence, labels):
     Given a list of evidence lists and a list of labels, return a
     fitted k-nearest neighbor model (k=1) trained on the data.
     """
-    raise NotImplementedError
+    # raise NotImplementedError
+    model = KNeighborsClassifier(n_neighbors=1)
+    model.fit(evidence, labels)
+    return model
 
 
 def evaluate(labels, predictions):
@@ -85,7 +149,10 @@ def evaluate(labels, predictions):
     representing the "true negative rate": the proportion of
     actual negative labels that were accurately identified.
     """
-    raise NotImplementedError
+    # raise NotImplementedError
+    true_positive = sum(1 for i in range(len(labels)) if labels[i] == 1 and predictions[i] == 1)/sum(1 for i in range(len(labels)) if labels[i] == 1)
+    true_negative = sum(1 for i in range(len(labels)) if labels[i] == 0 and predictions[i] == 0)/sum(1 for i in range(len(labels)) if labels[i] == 0)
+    return true_positive, true_negative
 
 
 if __name__ == "__main__":
